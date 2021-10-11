@@ -1,0 +1,13 @@
+{% macro render_paragraph(paragraph, citations) %}
+    {% for sentence in paragraph %}
+        {% set text_to_render = sentence %}
+        {% for citation in citations %}
+            {% if citation in sentence %}
+`   `           {%set text_to_render = text_to_render | replace(citation, '<a href=/index>' ~ citation ~ '</a>')%}
+            {% endif %}
+        {% endfor %}
+        <p><nobr>{{ text_to_render }}</nobr></p>
+    {% endfor %}
+
+
+{% endmacro %}

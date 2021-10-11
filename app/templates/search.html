@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 style="text-align: center;">What article do you want to read?</h1>
+<form style="text-align: center;" action="" method="post" novalidate>
+  {{ form.hidden_tag() }}
+  <p>
+    {{ form.searchfield.label }} <br>
+  <div>{{ form.searchfield(size=64) }}</div>
+
+
+    {% for error in form.searchfield.errors %}
+    <span style="color: red;">[{{ error }}]</span>
+    {% endfor %}
+  </p>
+  <p>{{ form.submit() }}</p>
+{% endblock %}

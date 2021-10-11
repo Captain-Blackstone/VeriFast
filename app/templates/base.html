@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+
+
+{% import "sidebar.html" as sidebar %}
+<html>
+    <head>
+        {% if title %}
+        <title> {{title}} - VeriFast </title>
+        {% else %}
+        <title> Welcome to VeriFast!</title>
+        {% endif %}
+
+        <style>
+.collapsible {background-color: #777;color: white;cursor: pointer;padding: 18px;width: 100%;border: none;text-align: left;outline: none;font-size: 15px;}
+
+.active, .collapsible:hover {
+  background-color: #555;
+}
+</style>
+
+
+    </head>
+    <body>
+        {{sidebar.show_cited_sections(sections=sections)}}
+        <div id="page-content" style="margin-right: 530px;">
+            <div>VeriFast:
+                <a href="{{url_for('search')}}">Search</a>
+                <a href="{{url_for('contact')}}">Contact Us</a>
+            </div>
+            <hr>
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul>
+                {% for message in messages %}
+                <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock  %}
+        </div>
+
+           <script>
+        function getData(isection, iparagraph, isentence, citation_instance, article_id)
+    {fetch('/get_paragraphs/'  + arguments[0] + '/' +
+                                 arguments[1] + '/' +
+                                 arguments[2] + '/' +
+                                 arguments[3] + '/' +
+                                 arguments[4]) .then(
+        function (response)
+    {return response.json();}).then(
+      function displayParagraphs(article)
+      {
+      let sidebar_span = document.getElementById('paragraph_space');
+      sidebar_span.innerHTML = "";
+      for (key in article) {
+        if (key === "full_title"){
+               let link_to_original_text = document.createElement("a");
+                   link_to_original_text.href = "/view_article/" + article[key];
+                   link_to_original_text.innerHTML = "<b>" + article[key] + "</b>";
+                   link_to_original_text.target = "_blank";
+                   sidebar_span.appendChild(link_to_original_text);
+                   continue;}
+        let button = document.createElement("button");
+        button.className = "collapsible";
+        button.innerHTML = key;
+        button.type = "button";
+
+        let cnt = document.createElement("div");
+        cnt.className = "expander";
+        let p = document.createElement("p");
+        p.innerHTML = article[key];
+        cnt.style.cssText = "padding: 0 18px;display: none;overflow: hidden;background-color: #f1f1f1;"
+
+        cnt.appendChild(p);
+        sidebar_span.appendChild(button);
+        sidebar_span.appendChild(cnt);
+                            }
+       var coll = document.getElementsByClassName("collapsible");
+        var i;
+
+        for (i = 0; i < coll.length; i++) {
+          coll[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var content = this.nextElementSibling;
+            if (content.style.display === "block") {content.style.display = "none";} else {content.style.display = "block";}
+                                                        });
+                                           }
+
+       });}
+
+</script>
+    </body>
+</html>

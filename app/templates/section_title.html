@@ -1,0 +1,19 @@
+{% macro show_title(number, text) %}
+{% if number == 1 %}
+    <h1>{{text}}</h1>
+{% elif number == 2 %}
+    <h2>{{text}}</h2>
+{% elif number == 3 %}
+    <h3>{{text}}</h3>
+{% elif number == 4 %}
+    <h4>{{text}}</h4>
+{% elif number == 5 %}
+    <h5>{{text}}</h5>
+{% elif number == 6 %}
+    <h6>{{text}}</h6>
+{% elif number == 7 %}
+    <h7>{{text}}</h7>
+{% elif number == 8 %}
+    <h8>{{text}}</h8>
+{% endif %}
+{% endmacro %}

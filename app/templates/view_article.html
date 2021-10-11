@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% import "section_title.html" as section_title %}
+{% import "paragraph.html" as render_paragraph %}
+
+
+{% block content %}
+
+<h1>{{article["full_title"] }}</h1>
+{% set subsections = [] %}
+{% for section in article["text"] %}
+    {% set isection = loop %}
+    {% for subsection in section["section_title"].split("|") %}
+        {% if subsection not in subsections %}
+            {{section_title.show_title(loop.index+1, subsection)}}
+            {{ subsections.append(subsection) or "" }}
+        {% endif %}
+    {% endfor %}
+    {% for paragraph in section["section_text"] %}
+        {% set iparagraph = loop %}
+        {% for sentence in paragraph %}
+            {% set isentence = loop %}
+            {% set text_to_render = {"sentence": sentence} %}
+            {% for citation_instance in citations[(isection.index0, iparagraph.index0, isentence.index0)] %}
+                {% set replacing_text = '<button onclick="getData()"><b>' ~ citation_instance ~ '</b></button>' %}
+                {% set newtext = text_to_render["sentence"] | replace(citation_instance, replacing_text) %}
+                {% set newtext = newtext | replace("getData()", "getData(" ~ isection.index0 ~ "," ~ iparagraph.index0 ~ "," ~ isentence.index0 ~ ",'" ~ citation_instance ~ "'," ~ article_id ~ ")") %}
+
+                {% if text_to_render.update({"sentence": newtext}) %} {% endif %}
+            {% endfor %}
+            <p style="display:inline">{{ text_to_render.sentence|safe}}</p>
+        {% endfor %}
+        <br><br>
+    {% endfor %}
+{% endfor %}
+
+{% endblock %}
