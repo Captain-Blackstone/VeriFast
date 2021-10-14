@@ -48,7 +48,7 @@ class Parser:
 
                 text = child.text
                 if text is None:
-                    if len(list(child.getchildren())) > 0:
+                    if len(list(child)) > 0:
                         text = child[0].text
                 if text is not None:
                     if not tag:
@@ -58,7 +58,7 @@ class Parser:
 
             if child.tag == "p":
                 specital_paragraph = False
-                paragraph_children = child.getchildren()
+                paragraph_children = list(child)
                 for p_child in paragraph_children:
                     if p_child.tag in ("fig", "table-wrap"):
                         paragraphs = self._work_with_section(p_child, paragraphs, tag)
@@ -67,7 +67,7 @@ class Parser:
                     paragraph = "".join(child.itertext()).strip()
                 else:
                     parts = ([child.text] +
-                             list(chain(*([c.text, c.tail] for c in child.getchildren() if
+                             list(chain(*([c.text, c.tail] for c in list(child) if
                                           c.tag not in ("fig", "table-wrap")))) +
                              [child.tail])
                     paragraph = ''.join(filter(None, parts)).strip()
@@ -142,7 +142,7 @@ class Parser:
         # extract abstract & text
         abstract = tree.find(".//abstract")
         if abstract:
-            for ch in abstract.getchildren():
+            for ch in list(abstract):
                 if len(ch.text) > 50:
                     abstract = ch.text
                     break
@@ -224,3 +224,10 @@ class Parser:
             output['citations'] = self._extract_citations(tree, paragraphs)
 
         return output
+
+if __name__ == '__main__':
+    ParserObj = Parser()
+    with open("/home/dmitry/Downloads/Telegram Desktop/PMC2813300.xml", "r") as fl:
+        xml = fl.read()
+    text = ParserObj(xml)
+    print(text)
