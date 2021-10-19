@@ -21,7 +21,7 @@ class SemanticSearcher:
 
     def dirty_call(self, sentence, json_article, final_result):
         query_embedding = self.model.encode(sentence)
-        sections =  json_article["text"]
+        sections = json_article["text"]
         main_sections = dedup([section["section_title"].split("|")[0] for section in sections])
         for main_section in main_sections:
             pps = []
@@ -38,7 +38,7 @@ class SemanticSearcher:
         return final_result
 
 
-def __call__(self, parsed_paper):
+    def __call__(self, parsed_paper):
         # 1. add `selected_paragraphs` as a list of ids of citation sentences
         # 2. for each paper, for each section - run semantic search
         # 3. for each search result
@@ -55,15 +55,15 @@ def __call__(self, parsed_paper):
                 for (section_id, paragraph_id, sentence_id, _) in paper['selected_paragraphs']
             ]
             sections = parsed_paper['citations']['papers'][cit_label]['text']
-            query_embedding = model.encode(sentences, convert_to_tensor=True)
+            query_embedding = self.model.encode(sentences, convert_to_tensor=True)
             selected_paragraphs = []
             for section in sections:
                 paragraphs = ["".join(paragraph) for paragraph in section['section_text']]
-                passage_embeddings = model.encode(paragraphs, convert_to_tensor=True)
+                passage_embeddings = self.model.encode(paragraphs, convert_to_tensor=True)
                 search_results = util.semantic_search(
                     query_embedding,
-                    passage_embedding,
-                    top_k=top_k,
+                    passage_embeddings,
+                    top_k=self.top_k,
                     score_function=util.dot_score
                 )
                 selected_paragraphs.append(search_results)

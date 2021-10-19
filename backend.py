@@ -13,7 +13,7 @@ from nn import SemanticSearcher
 
 
 def load_article(doi_or_name=None):
-    doi_or_name = " ".join(doi_or_name.split()) # remove multiple spaces
+    doi_or_name = " ".join(doi_or_name.split())  # remove multiple spaces
     if len(doi_or_name) < 32:
         search_parameter = Article.doi
     else:
@@ -23,7 +23,7 @@ def load_article(doi_or_name=None):
         record = db.session.query(Article).filter(search_parameter == doi_or_name).one()
         with open(f"article_base/{record.filename}", "r") as fl:
             json_file = json.load(fl)
-        id = record.id
+            article_id = record.id
     except NoResultFound:
         start = time.time()
         xml_file_text, source = SearcherObj(doi_or_name)
@@ -42,15 +42,15 @@ def load_article(doi_or_name=None):
             with open(f"article_base/{new_article.filename}", "w") as fl:
                 json.dump(json_file, fl)
             db.session.commit()
-        id = new_article.id
-
+        article_id = new_article.id
 
     citations_dct = defaultdict(lambda: [])
     for citation in json_file["citations"]["sentence_ids"]:
         key = tuple(citation[:3])
         value = citation[3]
         citations_dct[key].append(value)
-    return json_file, citations_dct, id
+    return json_file, citations_dct, article_id
+
 
 def paragraphs_from_article(isection, iparagraph, isentence, citation_instance, article_id):
     print("button pressed")
@@ -63,7 +63,6 @@ def paragraphs_from_article(isection, iparagraph, isentence, citation_instance, 
     with open(f"article_base/{article_id}.json", "r") as fl:
         source_article = json.load(fl)
     # source_article = article["citations"]["papers"][citation_instance]
-
 
     if source_article["text"]:
         out_dict = dict()
@@ -80,7 +79,7 @@ def paragraphs_from_article(isection, iparagraph, isentence, citation_instance, 
         print("starting parsing")
         source_article_json = Parser()(source_article, source_db)
         article["citations"]["papers"][citation_instance] = source_article_json
-        #with open(f"article_base/{article_id}.json", "r") as fl:
+        # with open(f"article_base/{article_id}.json", "r") as fl:
         #    json.dump(article, fl)
         print("starting semantic search")
         out_dict = dict()

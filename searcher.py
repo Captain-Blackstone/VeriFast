@@ -7,8 +7,9 @@ import requests
 from habanero import Crossref
 
 from Bio import Entrez
-from requests import get
 
+
+from async_test import db, DoiPmcidPmid
 
 class Searcher:
     def __init__(self, api_key, pubmed_email, elsevier_apikey_config, pmc_db="pmc", pubmed_db="pubmed"):
@@ -41,14 +42,10 @@ class Searcher:
         else:
             raise Exception("No valid input to searcher is provided")
         # Search Crossref database for the paper metadata
-        print("s1")
         if doi:
-            print("s1_doi")
             crossref_meta = self.fetch_meta(search_query)
         else:
-            print("s1_no_doi")
             crossref_meta = self.crossref_search_meta(search_query)
-        print("s2")
         try:
             text_link = crossref_meta["link"][0]["URL"]
         except KeyError:
@@ -56,21 +53,19 @@ class Searcher:
             text_link = crossref_meta["URL"]
         publisher = crossref_meta["publisher"]
         id_tuple = self.convert_id(crossref_meta["DOI"])
-        print("s3")
         try:
-            print(id_tuple)
             if id_tuple[1] == "":
                 raise KeyError
             if "Elsevier" in publisher:
                 raise KeyError
             pmc_xml = self.fetch_fulltext(pmcid=id_tuple[1])
+            print(pmc_xml)
             pmc_parsed = ET.fromstring(pmc_xml)
             for child in pmc_parsed[0]:
                 if child.tag == "body":
                     return pmc_xml, "pmc"
             raise KeyError
         except KeyError:
-            print("s4e")
             try:
                 pubmed_xml = self.ncbi_fetch(id_input=id_tuple[0], db="pubmed")
                 return pubmed_xml, "pubmed"
@@ -107,7 +102,8 @@ class Searcher:
         :param db:
         :return:
         """
-        record = db.session.query(DoiPmcidPmid).filter(DoiPmcidPmid.doi == doi).one()
+        print(doi)
+        record = db.session.query(DoiPmcidPmid).filter(DoiPmcidPmid.doi.contains(doi)).one()
         return record.pmid, record.pmcid, record.doi
 
     def ncbi_fetch(self, id_input, db="pubmed"):
@@ -123,17 +119,20 @@ class Searcher:
         :param query: a text query with paper name
         :return:
         """
-        print("starting_cr_work")
-        print(query)
+
         meta_json_search_results = self.cr.works(query=query)
-        print("cr_worked")
         for item in meta_json_search_results["message"]["items"]:
             if re.match(item["title"][0], query, re.IGNORECASE):
                 return item
         print(f"No exact match found for query {query}, returning closest search result")
         return meta_json_search_results["message"]["items"][0]
 
-    def fetch_meta(self, doi=None, pmid=None, pmid_list=None, db="crossref"):
+    async def fetch_meta(self,
+                   doi=None,
+                   pmid=None,
+                   pmid_list=None,
+                   db="crossref",
+                   session=None):
         """
         Fetches paper metadata in json format by doi from crossref database
         :param doi:
@@ -144,17 +143,27 @@ class Searcher:
             return meta_json["message"]
         elif db == "pubmed":
             if pmid:
-                meta_json = get(
-                    "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id={}&retmode=json".format(
-                        pmid)).json()
-                return meta_json
+                meta = await session.request(method="GET",
+                                                  url=f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id={pmid}&retmode=json")
+                # meta_json = requests.get(
+                #     "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id={}&retmode=json".format(
+                #         pmid)).json()
+                return meta.json()
             elif pmid_list:
-                meta_json = get(
-                    "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id={}&retmode=json".format(
-                        ",".join(pmid_list))).json()
-                return meta_json
+                meta = await session.request(method="GET",
+                                             url=f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id={','.join(pmid_list)}&retmode=json"
+                                             )
+                # meta_json = requests.get(
+                #     "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id={}&retmode=json".format(
+                #         ",".join(pmid_list))).json()
+                return meta.json()
 
-    def fetch_fulltext(self, url=None, pmcid=None, publisher=None, email=None):
+    async def fetch_fulltext(self,
+                       url=None,
+                       pmcid=None,
+                       publisher=None,
+                       email=None,
+                       session=None):
         if url:
             # Place your kostily here:
             # For PLoS
@@ -163,12 +172,16 @@ class Searcher:
                                                                                            "/article/file?id=")
             if "Elsevier" in publisher:
                 headers = {"X-ELS-APIKey": self.elsevier_apikey_config}
-            publisher_response = requests.get(url, headers=headers)
-            if publisher_response.status_code == 200:
-                return publisher_response.text
+            publisher_response = await session.request(method="GET",
+                                                       url=url,
+                                                       headers=headers)
+            # publisher_response = requests.get(url, headers=headers)
+            if publisher_response.status == 200:
+                text = await publisher_response.text()
+                return text
             else:
                 print(f"Could not load paper from url: {url}\n"
-                                f"{publisher_response.status_code}: {publisher_response.reason}\n{publisher_response.url}")
+                                f"{publisher_response.status}: {publisher_response.reason}\n{publisher_response.url}")
 
         elif pmcid:
             pmc_data = self.ncbi_fetch(pmcid, db="pmc")
@@ -181,11 +194,7 @@ if __name__ == '__main__':
         pubmed_email_config = config_dict["pubmed_email"]
         elsevier_apikey_config = config_dict["elsevier_apikey"]
 
-    with open("PMID_PMCID_DOI.csv", "r") as fl:
-        text = fl.readlines()
-
     Entrez.email = pubmed_email_config
-    searcher = Searcher(api_key="", pubmed_email=pubmed_email_config, elsevier_apikey_config=elsevier_apikey_config,
-                        pmid_pmcid_doi_db_text=text, pmc_db="pmc", pubmed_db="pubmed")
+    searcher = Searcher(api_key="", pubmed_email=pubmed_email_config, elsevier_apikey_config=elsevier_apikey_config, pmc_db="pmc", pubmed_db="pubmed")
     print(searcher(
         "Genomic Profiles in Stage I Primary Non Small Cell Lung Cancer Using Comparative Genomic Hybridization Analysis of cDNA Microarrays"))
