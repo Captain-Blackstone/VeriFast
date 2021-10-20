@@ -2,3 +2,4 @@ __pycache__/
 config.json
 config.py
 app.db
+.idea/

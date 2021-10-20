@@ -9,10 +9,18 @@ from habanero import Crossref
 from Bio import Entrez
 
 
-from async_test import db, DoiPmcidPmid
+# from app import db
+# from app.models import DoiPmcidPmid
 
 class Searcher:
-    def __init__(self, api_key, pubmed_email, elsevier_apikey_config, pmc_db="pmc", pubmed_db="pubmed"):
+    def __init__(self,
+                 doi_pmid_pmcid_db,
+                 api_key,
+                 pubmed_email,
+                 elsevier_apikey_config,
+                 pmc_db="pmc",
+                 pubmed_db="pubmed",
+                 DoiPmcidPmidClass = None):
         """
         This is a Searcher module. It is used to search for papers in the publishers API.
         The logic of this module is to start searching in one db,
@@ -20,6 +28,8 @@ class Searcher:
         Args:
             - pubmed_email: str - pubmed email used to surf pubmed database
         """
+        self.doi_pmid_pmcid_db = doi_pmid_pmcid_db
+        self.DoiPmcidPmidClass = DoiPmcidPmidClass
         self.elsevier_apikey_config = elsevier_apikey_config
         self.pubmed_email = pubmed_email
         self.api_key = api_key
@@ -28,7 +38,11 @@ class Searcher:
         self.doi_regexp = re.compile('\b(10[.][0-9]{4,}(?:[.][0-9]+)*/(?:(?!["&\'<>])\S)+)\b')
         self.cr = Crossref()
 
-    def __call__(self, text_input=None, doi=None, pmcid=None, pmid=None):
+    async def __call__(self,
+                       text_input=None,
+                       doi=None,
+                       pmcid=None,
+                       pmid=None):
         db = self.pubmed_db
         if doi:
             search_query = doi.strip()
@@ -58,8 +72,10 @@ class Searcher:
                 raise KeyError
             if "Elsevier" in publisher:
                 raise KeyError
-            pmc_xml = self.fetch_fulltext(pmcid=id_tuple[1])
+            print("Starting waiting")
+            pmc_xml = await self.fetch_fulltext(pmcid=id_tuple[1])
             print(pmc_xml)
+            print("Finishing waiting")
             pmc_parsed = ET.fromstring(pmc_xml)
             for child in pmc_parsed[0]:
                 if child.tag == "body":
@@ -102,8 +118,8 @@ class Searcher:
         :param db:
         :return:
         """
-        print(doi)
-        record = db.session.query(DoiPmcidPmid).filter(DoiPmcidPmid.doi.contains(doi)).one()
+        record = self.doi_pmid_pmcid_db.session.query(self.DoiPmcidPmidClass).filter(self.DoiPmcidPmidClass.doi.contains(doi)).one()
+        print(record.pmid, record.pmcid, record.doi)
         return record.pmid, record.pmcid, record.doi
 
     def ncbi_fetch(self, id_input, db="pubmed"):
@@ -178,6 +194,7 @@ class Searcher:
             # publisher_response = requests.get(url, headers=headers)
             if publisher_response.status == 200:
                 text = await publisher_response.text()
+                print(text)
                 return text
             else:
                 print(f"Could not load paper from url: {url}\n"
@@ -188,6 +205,7 @@ class Searcher:
             return pmc_data
 
 
+
 if __name__ == '__main__':
     with open("config.json", "r") as config:
         config_dict = json.load(config)
@@ -195,6 +213,15 @@ if __name__ == '__main__':
         elsevier_apikey_config = config_dict["elsevier_apikey"]
 
     Entrez.email = pubmed_email_config
-    searcher = Searcher(api_key="", pubmed_email=pubmed_email_config, elsevier_apikey_config=elsevier_apikey_config, pmc_db="pmc", pubmed_db="pubmed")
-    print(searcher(
-        "Genomic Profiles in Stage I Primary Non Small Cell Lung Cancer Using Comparative Genomic Hybridization Analysis of cDNA Microarrays"))
+    searcher = Searcher(api_key="",
+                        pubmed_email=pubmed_email_config,
+                        elsevier_apikey_config=elsevier_apikey_config,
+                        pmc_db="pmc",
+                        pubmed_db="pubmed")
+    async def getres(title):
+        r1, r2 = await searcher(title)
+        return r1
+    res = getres("Identification of SOX2 as a novel glioma-associated antigen and potential target for T cell-based immunotherapy")
+    print(res)
+    # print(searcher(
+    #     "Genomic Profiles in Stage I Primary Non Small Cell Lung Cancer Using Comparative Genomic Hybridization Analysis of cDNA Microarrays"))

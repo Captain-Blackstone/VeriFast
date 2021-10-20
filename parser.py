@@ -3,8 +3,6 @@ from collections import defaultdict
 import collections
 from itertools import chain
 
-import json
-import unicodedata
 import nltk
 
 # nltk.download('punkt')
@@ -82,7 +80,7 @@ class Parser:
     def _extract_citations(self, tree, paragraphs):
         citations = {'sentence_ids': list(), 'papers': dict()}
         # find all labels of citations in text
-        rid = tree.findall(".//xref[@ref-type='bibr']") + tree.findall(".//xref[@ref-type='other']") 
+        rid = tree.findall(".//xref[@ref-type='bibr']") + tree.findall(".//xref[@ref-type='other']")
         rid_labels = {ref.attrib.get("rid", ''): "".join(ref.itertext()) for ref in rid if
                       ref.text is not None}
         for ref in tree.findall(".//ref"):
@@ -153,7 +151,6 @@ class Parser:
         for section in sections:
             paragraphs = self._work_with_section(section, paragraphs)
         # cast into appropriate format
-        print(paragraphs)
         paragraphs = [
             {
                 'section_title': key,
@@ -164,7 +161,6 @@ class Parser:
             for key in paragraphs
         ]
         # del paragraphs['abstract']
-        # print(paragraphs)
         output['text'] = paragraphs
         # : 'full_title',
         search_result = tree.find(".//" + 'article-title')

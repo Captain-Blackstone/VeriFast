@@ -1,3 +1,4 @@
+import asyncio
 from flask import render_template, redirect, url_for, jsonify
 from app import app
 from app.forms import SearchForm
@@ -27,10 +28,8 @@ def search_paragraphs(citation_id, article):
 
 
 @app.route("/get_paragraphs/<isection>/<iparagraph>/<isentence>/<citation_instance>/<article_id>")
-def get_paragraphs(isection, iparagraph, isentence, citation_instance, article_id):
-    res = paragraphs_from_article(isection, iparagraph, isentence, citation_instance, article_id)
-    print("finished semantic search")
-    print(res)
+async def get_paragraphs(isection, iparagraph, isentence, citation_instance, article_id):
+    res = await paragraphs_from_article(isection, iparagraph, isentence, citation_instance, article_id)
     return jsonify(res)
 
 @app.route("/contact")
