@@ -15,7 +15,7 @@ SearcherObj = Searcher(doi_pmid_pmcid_db=db,
                        elsevier_apikey_config=elsevier_apikey_config,
                        pmc_db="pmc",
                        pubmed_db="pubmed",
-                       DoiPmcidPmidClass=DoiPmcidPmid)
+                       doi_pmcid_pmid_class=DoiPmcidPmid)
 
 
 @app.shell_context_processor

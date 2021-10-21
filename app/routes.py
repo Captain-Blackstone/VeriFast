@@ -1,9 +1,10 @@
-import asyncio
 from flask import render_template, redirect, url_for, jsonify
 from app import app
 from app.forms import SearchForm
 from backend import load_article, paragraphs_from_article
 from config import Config
+
+
 
 @app.route("/", methods=["GET", "POST"])
 @app.route("/search", methods=["GET", "POST"])
