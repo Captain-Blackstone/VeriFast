@@ -4,6 +4,7 @@ from app.models import Article, DoiPmcidPmid
 from searcher import Searcher
 import json
 
+
 with open("config.json", "r") as config:
     config_dict = json.load(config)
     pubmed_email_config = config_dict["pubmed_email"]
@@ -21,4 +22,3 @@ SearcherObj = Searcher(doi_pmid_pmcid_db=db,
 @app.shell_context_processor
 def make_shell_context():
     return {"db": db, "Article": Article, "DoiPmcidPmid": DoiPmcidPmid}
-

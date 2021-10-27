@@ -64,10 +64,7 @@ class Searcher:
                 raise KeyError
             if "Elsevier" in publisher:
                 raise KeyError
-            print("Starting waiting")
             pmc_xml = await self.fetch_fulltext(pmcid=id_tuple[1])
-            print(pmc_xml)
-            print("Finishing waiting")
             pmc_parsed = ET.fromstring(pmc_xml)
             for child in pmc_parsed[0]:
                 if child.tag == "body":
@@ -106,8 +103,9 @@ class Searcher:
         :param doi: doi of an article
         :return:
         """
+        doi = doi.split("doi.org/")[-1].replace('"', '')
         record = self.doi_pmid_pmcid_db.session.query(self.DoiPmcidPmidClass).\
-            filter(self.DoiPmcidPmidClass.doi.contains(doi)).one()
+            filter(self.DoiPmcidPmidClass.doi == doi).first()
         print(record.pmid, record.pmcid, record.doi)
         return record.pmid, record.pmcid, record.doi
 
@@ -175,7 +173,6 @@ class Searcher:
                                                        headers=headers)
             if publisher_response.status == 200:
                 text = await publisher_response.text()
-                print(text)
                 return text
             else:
                 print(f"Could not load paper from url: {url}\n"
@@ -189,7 +186,7 @@ class Searcher:
 if __name__ == '__main__':
     from app import db
     from app.models import DoiPmcidPmid
-
+    import json
     with open("config.json", "r") as config:
         config_dict = json.load(config)
         pubmed_email_config = config_dict["pubmed_email"]
@@ -205,9 +202,10 @@ if __name__ == '__main__':
                         pubmed_db="pubmed")
 
     async def getres(title):
+        print("starting getres")
         r1, r2 = await searcher(title)
         return r1
-
-    res = getres("Identification of SOX2 as a novel glioma-associated antigen and potential target "
+    print("1")
+    res =  getres("Identification of SOX2 as a novel glioma-associated antigen and potential target "
                  "for T cell-based immunotherapy")
     print(res)
