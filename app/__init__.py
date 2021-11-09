@@ -9,16 +9,6 @@ import datetime
 import os
 
 
-def start_redis():
-    redtest = StrictRedis(host="localhost", port=6379)
-    try:
-        return redtest.ping()
-    except redis.exceptions.ConnectionError:
-        os.system("redis-server &")
-        os.system("rq worker download-articles-tasks &")
-
-
-#start_redis()
 app = Flask(__name__)
 app.config.from_object(Config)
 db = SQLAlchemy(app)

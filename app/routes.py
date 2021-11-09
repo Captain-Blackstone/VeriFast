@@ -15,13 +15,13 @@ def search():
     form = SearchForm()
     if form.validate_on_submit():
         doi_or_name = form.searchfield.data
-        return redirect(url_for("view", doi_or_name=doi_or_name))
+        return redirect(url_for("view", doi_or_name=doi_or_name.replace("/","%2F")))
     return render_template("search.html", title="Search", form=form)
 
 
 @app.route("/view_article/<doi_or_name>")
 def view(doi_or_name):
-    article, citations, article_id = load_article(doi_or_name)
+    article, citations, article_id = load_article(doi_or_name.replace("%2F", "/"))
     return render_template("view_article.html", article=article,
                            citations=citations,
                            article_id=article_id)
