@@ -6,6 +6,10 @@ from config import Config
 
 
 @app.route("/", methods=["GET", "POST"])
+def home():
+    return render_template("home.html", title="Home")
+
+
 @app.route("/search", methods=["GET", "POST"])
 def search():
     form = SearchForm()

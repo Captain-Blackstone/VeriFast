@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 style=text-align:center;font-size:50px;">Welcome to VeriFast!</h1>
+<p>VeriFast is a scientific literature research assistant. You enter the name of the article that you want to read,
+we find it in the web and load it, you read it. The main feature of our assistant is an option of citation verification.
+How often do you find yourself in a situation when you get intersted (or suspicious) in some statement that cites another
+paper? What do you do? Presumably you find this paper and then scan it trying to figure out what exactly the authors meant
+by referencing this paper. The relevant info might be in the abstract, but it might as well be buried somewhere deep in the
+methods section. With our tool all you gotta do is to click on the citation, that's it! On the right panel the most relevant
+paragraphs of the cited article will appear - they most likely contain the information related to the sentence that contains
+the citation you were interested in. Just check them out and be done with it. If you're still not satisfyed, you can also
+open the cited article in new tab in one click.</p>
+<h1 style=text-align:center;">Here is how it works in two steps: </h1>
+
+<table>
+    <tr>
+        <td style="font-size:40px"><b>1.</b></td>
+        <td></td>
+        <td align="center"><img src="{{ url_for('static', filename = 'expl1.1.png') }}"
+                 width="800"
+                 height="150"
+                 alt=""
+                 title="Logo"
+                 border="0"></td>
+
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+        <td align="center"><img src="{{ url_for('static', filename = 'arrow_down.png') }}"
+                 width="100"
+                 alt=""
+                 title="Logo"
+                 border="0">
+        </td>
+    </tr>
+    <tr>
+        <td style="font-size:40px"><b>2.</b></td>
+        <td></td>
+        <td align="center"><img src="{{ url_for('static', filename = 'expl2.2.png') }}"
+                 width="800"
+                 height="288"
+                 alt=""
+                 title="Logo"
+                 border="0"></td>
+    </tr>
+
+</table>
+{% endblock %}

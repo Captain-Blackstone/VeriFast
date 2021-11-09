@@ -1,5 +1,6 @@
 import json
 from collections import defaultdict
+
 from app import app
 from app.models import Task
 from app import db
@@ -44,11 +45,11 @@ def load_article(doi_or_name=None):
         citations_dct[key].append(value)
 
     # Send to background downloading of all the cited articles
-    for val in json_file["citations"]["papers"].values():
-        cited_paper_name = val["full_title"]
-        launch_background_task("download_article",
-                               doi_or_name=cited_paper_name,
-                               log_file=f"logs/{app.session_time}_failed_tasks.log")
+    #for val in json_file["citations"]["papers"].values():
+    #    cited_paper_name = val["full_title"]
+    #    launch_background_task("download_article",
+    #                           doi_or_name=cited_paper_name,
+    #                           log_file=f"logs/{app.session_time}_failed_tasks.log")
     return json_file, citations_dct, article_id
 
 

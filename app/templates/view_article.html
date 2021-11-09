@@ -5,7 +5,8 @@
 
 {% block content %}
 
-<h1>{{article["full_title"] }}</h1>
+<h1>{{ article["full_title"] }}</h1>
+<p><b>{{ article["abstract"] }}</b></p>
 {% set subsections = [] %}
 {% for section in article["text"] %}
     {% set isection = loop %}

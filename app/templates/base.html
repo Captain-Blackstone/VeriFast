@@ -4,6 +4,7 @@
 {% import "sidebar.html" as sidebar %}
 <html>
     <head>
+        <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
         {% if title %}
         <title> {{title}} - VeriFast </title>
         {% else %}
@@ -23,7 +24,16 @@
     <body>
         {{sidebar.show_cited_sections(sections=sections)}}
         <div id="page-content" style="margin-right: 530px;">
-            <div>VeriFast:
+
+            <div style="background-color:#ef8a62;font-size:40px;">
+                <a href="{{url_for('home')}}"><img src="{{ url_for('static', filename = 'logo.png') }}"
+                                                   width="64"
+                                                   height="64"
+                                                   alt=""
+                                                   title="Logo"
+                                                   border="0"></a>
+                VeriFast:
+                <a href="{{url_for('home')}}">Home</a>
                 <a href="{{url_for('search')}}">Search</a>
                 <a href="{{url_for('contact')}}">Contact Us</a>
             </div>
@@ -40,54 +50,61 @@
             {% block content %}{% endblock  %}
         </div>
 
+
+
+
+
            <script>
         function getData(isection, iparagraph, isentence, citation_instance, article_id)
-    {fetch('/get_paragraphs/'  + arguments[0] + '/' +
-                                 arguments[1] + '/' +
-                                 arguments[2] + '/' +
-                                 arguments[3] + '/' +
-                                 arguments[4]) .then(
-        function (response)
-    {return response.json();}).then(
-      function displayParagraphs(article)
-      {
-      let sidebar_span = document.getElementById('paragraph_space');
-      sidebar_span.innerHTML = "";
-      for (key in article) {
-        if (key === "full_title"){
-               let link_to_original_text = document.createElement("a");
-                   link_to_original_text.href = "/view_article/" + article[key];
-                   link_to_original_text.innerHTML = "<b>" + article[key] + "</b>";
-                   link_to_original_text.target = "_blank";
-                   sidebar_span.appendChild(link_to_original_text);
-                   continue;}
-        let button = document.createElement("button");
-        button.className = "collapsible";
-        button.innerHTML = key;
-        button.type = "button";
+            {fetch('/get_paragraphs/'  + arguments[0] + '/' +
+                                         arguments[1] + '/' +
+                                         arguments[2] + '/' +
+                                         arguments[3] + '/' +
+                                         arguments[4]) .then(
+                        function (response)
+                            {return response.json();}).then(
+                                    function displayParagraphs(article)
+                                             {
+                                              let sidebar_span = document.getElementById('paragraph_space');
+                                              sidebar_span.innerHTML = "";
+                                              for (key in article) {
+                                                if (key === "full_title"){
+                                                       let link_to_original_text = document.createElement("a");
+                                                           link_to_original_text.href = "/view_article/" + article[key];
+                                                           link_to_original_text.innerHTML = "<b>" + article[key] + "</b>";
+                                                           link_to_original_text.target = "_blank";
+                                                           sidebar_span.appendChild(link_to_original_text);
+                                                           continue;}
+                                                let button = document.createElement("button");
+                                                button.className = "collapsible";
+                                                button.innerHTML = key;
+                                                button.type = "button";
+                                                button.style.cssText = "background-color: #2166ac"
 
-        let cnt = document.createElement("div");
-        cnt.className = "expander";
-        let p = document.createElement("p");
-        p.innerHTML = article[key];
-        cnt.style.cssText = "padding: 0 18px;display: none;overflow: hidden;background-color: #f1f1f1;"
+                                                let cnt = document.createElement("div");
+                                                cnt.className = "expander";
+                                                let p = document.createElement("p");
+                                                p.innerHTML = article[key];
+                                                cnt.style.cssText = "padding: 0 18px;display: none;overflow: hidden;background-color: #d1e5f0;"
+<!--                                                #f1f1f1-->
 
-        cnt.appendChild(p);
-        sidebar_span.appendChild(button);
-        sidebar_span.appendChild(cnt);
-                            }
-       var coll = document.getElementsByClassName("collapsible");
-        var i;
+                                                cnt.appendChild(p);
+                                                sidebar_span.appendChild(button);
+                                                sidebar_span.appendChild(cnt);
+                                                                    }
+                                               var coll = document.getElementsByClassName("collapsible");
+                                                var i;
 
-        for (i = 0; i < coll.length; i++) {
-          coll[i].addEventListener("click", function() {
-            this.classList.toggle("active");
-            var content = this.nextElementSibling;
-            if (content.style.display === "block") {content.style.display = "none";} else {content.style.display = "block";}
-                                                        });
-                                           }
+                                                for (i = 0; i < coll.length; i++) {
+                                                  coll[i].addEventListener("click", function() {
+                                                    this.classList.toggle("active");
+                                                    var content = this.nextElementSibling;
+                                                    if (content.style.display === "block") {content.style.display = "none";} else {content.style.display = "block";}
+                                                                                                });
+                                                                                   }
 
-       });}
+                                               });
+                                               }
 
 </script>
     </body>
