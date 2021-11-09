@@ -2,8 +2,47 @@
 
 {% block content %}
 <h1>Contacts</h1>
-<p>Feedback:</p>
-<p><b>{{mail_for_feedback}}</b></p>
-<p>Collaboraton:</p>
-<p><b>{{mail_for_collaborators}}</b></p>
+<p>Any feedback on our product is appreciated. We encourage you to send it to <b>{{mail_for_feedback}}</b></p>
+<p>We are extremely open to any type of collaboration. Send your suggestions and/or requests to <b>{{mail_for_collaborators}}</b></p>
+<h1 align="center">Meet our team!</h1>
+<p align="center">We are a group of Skoltech students who are excited about making research process easier.<br>
+    Please, enjoy our handsome faces.</p>
+<table style="border-spacing:20px;
+    padding-top: 10px;
+    padding-bottom: 20px;
+    padding-left: 150px;
+    padding-right: 150px;">
+    <tr>
+        <td align="center" style="padding:0 30px 0 30px;"><img src="{{ url_for('static', filename = 'dima.png') }}"
+                 width="150"
+                 height="150"
+                 alt=""
+                 title="Dmitry Biba"
+                 border="0"></td>
+        <td align="center" style="padding:0 30px 0 30px;"><img src="{{ url_for('static', filename = 'volodya.png') }}"
+                 width="150"
+                 height="150"
+                 alt=""
+                 title="Vladimir Shikov"
+                 border="0"></td>
+        <td align="center" style="padding:0 30px 0 30px;"><img src="{{ url_for('static', filename = 'sasha.png') }}"
+                 width="150"
+                 height="150"
+                 alt=""
+                 title="Alexander Ilin"
+                 border="0"></td>
+    </tr>
+    <tr>
+        <td align="center"><b>Dmitry Biba</b></td>
+        <td align="center"><b>Vladimir Shikov</b></td>
+        <td align="center"><b>Alexander Ilin</b></td>
+    </tr>
+<!--    <tr>-->
+<!--        <td align="center">Project management</td>-->
+<!--        <td align="center">Marketing management</td>-->
+<!--        <td align="center">Software development</td>-->
+<!--    </tr>-->
+
+</table>
+
 {% endblock %}
